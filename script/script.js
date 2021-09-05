@@ -10,7 +10,7 @@ if(localStorage.getItem('todo')) {
 }
 
 addButton.addEventListener('click', function() {
-
+  if (!addMessage.value) return
   let newTodo = {
     todo: addMessage.value,
     checked: false,
@@ -20,15 +20,17 @@ addButton.addEventListener('click', function() {
   todoList.push(newTodo);
   displayMessages()
   localStorage.setItem('todo', JSON.stringify(todoList))  // сохраняем данные с помощью localStorage (он принимает только строку)
+  addMessage.value = '';
 });
 
 function displayMessages() {
   let displayMessage = '';
+  if (todoList.length === 0) todo.innerHTML = '';
   todoList.forEach(function(item, index) {
     displayMessage += `
     <li>
       <input type='checkbox' id='item_${index}' ${item.checked ? 'checked' : ''}>
-      <label for='item_${index}'>${item.todo}</label>
+      <label for='item_${index}' class="${item.important ? 'important' : ''}">${item.todo}</label>
     </li>
     `; 
     todo.innerHTML = displayMessage;
@@ -47,4 +49,19 @@ todo.addEventListener('change', function(event) {
     }
   });
 
+});
+
+todo.addEventListener('contextmenu', function(event){
+  event.preventDefault();
+  todoList.forEach(function(item, index){
+    if (item.todo === event.target.innerHTML) {
+      if (event.ctrlKey || event.metaKey) {
+        todoList.splice(index, 1);
+      }else {
+          item.important = ! item.important;
+      }
+      displayMessages();
+      localStorage.setItem('todo', JSON.stringify(todoList));
+    }
+  });
 });
